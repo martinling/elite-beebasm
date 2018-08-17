@@ -12,7 +12,7 @@ source_instr_pattern = re.compile('^\s+([A-Z]+)(\s+([#&(),0-9A-Z+\\-%]+))?$')
 commentary_label_pattern = re.compile(
 	'^\t\.([A-Z0-9]+)(\s+\\\\\s+->\s+&([0-9A-F]+))?(\s+\\\\\s+(.*))?$')
 commentary_instr_pattern = re.compile(
-	'^(([0-9A-F]{2})\s){1,3}\s+([A-Z]+)(\s+([#&,0-9A-Z]+))?\s*(\\\\\s+(.*))?$')
+	'^(([0-9A-F]{2})\s){1,3}\s+([A-Z]+)(\s+([#&,0-9A-Z]+))?\s*(\\\\(.*\\\\)?\s+(.*))?$')
 
 label_comments = {}
 label_instructions = {}
@@ -33,7 +33,7 @@ for commentary_file in commentary_files:
 		if match:
 			instr = match.group(3)
 			argument = match.group(5)
-			comment = match.group(7)
+			comment = match.group(8)
 			if name:
 				label_instructions[name].append((instr, argument, comment))
 
@@ -58,7 +58,10 @@ for line in open(source_file):
 				c_instr, c_argument, c_comment = seq.pop(0)
 				if instr == c_instr and c_comment:
 					if argument:
-						result = " %s %s ; %s" % (instr, argument, c_comment)
+						if c_comment != argument:
+							result = " %s %s ; %s" % (instr, argument, c_comment)
+						else:
+							result = " %s %s" % (instr, argument)
 					else:
 						result = " %s ; %s" % (instr, c_comment)
 					print(result, file=output)
