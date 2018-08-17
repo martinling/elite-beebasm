@@ -46,7 +46,7 @@ for line in open(source_file):
 	if match:
 		name = match.group(1)
 		if name in label_comments:
-			print(".%s ; %s" % (name, label_comments[name]), file=output)
+			print(".%s ; %s" % (name, label_comments.pop(name)), file=output)
 			continue
 	match = source_instr_pattern.match(line)
 	if match:
@@ -70,3 +70,22 @@ for line in open(source_file):
 
 output.close()
 os.rename(output_file, source_file)
+
+print()
+print("Unmatched commentary:")
+
+for name, instructions in label_instructions.items():
+	if name in label_comments:
+		print()
+		print(".%s ; %s" % (name, label_comments[name]))
+	else:
+		if len(instructions) == 0:
+			continue
+		print(".%s" % name)
+	for instr, argument, comment in instructions:
+		print(" %s" % instr, end='')
+		if argument:
+			print (" %s" % argument, end='')
+		if comment:
+			print (" ; %s" % comment, end='')
+		print()
